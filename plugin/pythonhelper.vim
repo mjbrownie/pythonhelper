@@ -23,6 +23,7 @@
 " 1. Make sure your Vim has python feature on (+python). If not, you will need
 "    to recompile it with --with-pythoninterp option to the configure script
 " 2. Copy script pythonhelper.vim to the $HOME/.vim/plugin directory
+" 3. add '%{TagInStatusLine()}' yo your vimrc/statusline
 " 3. Run Vim and open any python file.
 " 
 python << EOS
@@ -614,7 +615,7 @@ def findTag(bufferNumber, changedTick):
         # if an appropriate tag has been found, set the description accordingly {{{
 	if (nearestLineNumber > -1):
 	    tagInfo = tags[nearestLineNumber]
-	    tagDescription = "[in %s (%s)]" % (tagInfo.fullName, PythonTag.TAG_TYPE_NAME[tagInfo.type],)
+	    tagDescription = "%s (%s)" % (tagInfo.fullName, PythonTag.TAG_TYPE_NAME[tagInfo.type],)
 	# }}}
 	# }}}
 
@@ -744,15 +745,6 @@ autocmd BufDelete * silent call PHBufferDelete()
 " time that determines after how long time of no activity the CursorHold event
 " is fired up
 set updatetime=1000
-
-" color of the current tag in the status line (bold cyan on black)
-highlight User1 gui=bold guifg=cyan guibg=black
-" color of the modified flag in the status line (bold black on red)
-highlight User2 gui=bold guifg=black guibg=red
-" the status line will be displayed for every window
-set laststatus=2
-" set the status line to display some useful information
-set stl=%-f%r\ %2*%m%*\ \ \ \ %1*%{TagInStatusLine()}%*%=[%l:%c]\ \ \ \ [buf\ %n]
 
 " }}}
 
