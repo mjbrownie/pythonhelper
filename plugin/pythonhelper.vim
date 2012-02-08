@@ -24,7 +24,7 @@
 "    to recompile it with --with-pythoninterp option to the configure script
 " 2. Copy script pythonhelper.vim to the $HOME/.vim/plugin directory
 " 3. add '%{TagInStatusLine()}' yo your vimrc/statusline
-" 3. Run Vim and open any python file.
+" 4. Run Vim and open any python file.
 " 
 python << EOS
 
