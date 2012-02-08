@@ -25,7 +25,9 @@
 "    the configure script
 " 2. Copy the pythonhelper.vim script to the $HOME/.vim/plugin directory, or
 "    install it in some other way (vim-addon-manager, pathogen, ...)
-" 3. Add '%{TagInStatusLine()}' to the statusline in your vimrc
+" 3. Add '%{TagInStatusLine()}' to the statusline in your vimrc. You can also
+"    use %{TagInStatusLine()} or %{TagInStatusLine()} for just the tag name or
+"    type respectively.
 " 4. Run Vim and open any Python file.
 "
 python << EOS
@@ -543,16 +545,22 @@ def findTag(bufferNumber, changedTick):
         # describe the cursor position (what tag the cursor is on) {{{
         # reset the description
         tagDescription = ""
+        tagDescriptionTag = ""
+        tagDescriptionType = ""
 
         # if an applicable tag has been found, set the description accordingly {{{
         if (nearestLineNumber > -1):
             tagInfo = tags[nearestLineNumber]
-            tagDescription = "%s (%s)" % (tagInfo.fullName, PythonTag.TAG_TYPE_NAME[tagInfo.type],)
+            tagDescriptionTag = tagInfo.fullName
+            tagDescriptionType = PythonTag.TAG_TYPE_NAME[tagInfo.type]
+            tagDescription = "%s (%s)" % (tagDescriptionTag, tagDescriptionType)
         # }}}
         # }}}
 
         # update the variable for the status line so it get updated with the new description
         vim.command("let w:PHStatusLine=\"%s\"" % (tagDescription,))
+        vim.command("let w:PHStatusLineTag=\"%s\"" % (tagDescriptionTag,))
+        vim.command("let w:PHStatusLineType=\"%s\"" % (tagDescriptionType,))
     # }}}
 
     # handle possible exceptions {{{
@@ -612,6 +620,8 @@ function! PHCursorHold()
     " only Python is supported {{{
     if (!exists('b:current_syntax') || (b:current_syntax != 'python'))
         let w:PHStatusLine = ''
+        let w:PHStatusLineTag = ''
+        let w:PHStatusLineType = ''
         return
     endif
     " }}}
@@ -622,8 +632,10 @@ endfunction
 
 
 function! PHBufferDelete()
-    " set the PHStatusLine for this window to an empty string
+    " set the PHStatusLine etc for this window to an empty string
     let w:PHStatusLine = ""
+    let w:PHStatusLineTag = ''
+    let w:PHStatusLineType = ''
 
     " call Python function deleteTags() with the current buffer number and change status indicator
     execute 'python deleteTags(' . expand("<abuf>") . ')'
@@ -634,6 +646,28 @@ function! TagInStatusLine()
     " return value of w:PHStatusLine in case it's set
     if (exists("w:PHStatusLine"))
         return w:PHStatusLine
+    " otherwise just return an empty string
+    else
+        return ""
+    endif
+endfunction
+
+
+function! TagInStatusLineTag()
+    " return value of w:PHStatusLineTag in case it's set
+    if (exists("w:PHStatusLineTag"))
+        return w:PHStatusLineTag
+    " otherwise just return an empty string
+    else
+        return ""
+    endif
+endfunction
+
+
+function! TagInStatusLineType()
+    " return value of w:PHStatusLineType in case it's set
+    if (exists("w:PHStatusLineType"))
+        return w:PHStatusLineType
     " otherwise just return an empty string
     else
         return ""
