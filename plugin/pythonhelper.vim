@@ -178,14 +178,11 @@ class SimplePythonTagsParser(object):
 
         # initalize local auxiliary variables {{{
         tagsStack       = []
-        lineNumber      = 0
         # }}}
 
+        import itertools
         # go through all the lines in the source and localize all Python tags in it {{{
-        for line in self.source:
-
-            # increase line number
-            lineNumber += 1
+        for (line, lineNumber) in zip(self.source, itertools.count(1)):
 
             # extract the line's indentation characters and its content {{{
             lineMatch           = self.COMMENTS_INDENT_RE.match(line)
