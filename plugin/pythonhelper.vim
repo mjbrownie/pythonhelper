@@ -25,7 +25,7 @@
 "    the configure script
 " 2. Copy the pythonhelper.vim script to the $HOME/.vim/plugin directory, or
 "    install it in some other way (vim-addon-manager, pathogen, ...)
-" 3. Add '%{TagInStatusLine()}' the statusline in your vimrc
+" 3. Add '%{TagInStatusLine()}' to the statusline in your vimrc
 " 4. Run Vim and open any Python file.
 "
 python << EOS
