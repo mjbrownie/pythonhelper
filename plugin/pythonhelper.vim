@@ -13,10 +13,10 @@
 "
 " Requirements
 " ------------
-" This script needs only VIM compiled with Python interpreter. It doesn't rely
-" on exuberant ctags utility. You can determine whether your VIM has Python
-" support by issuing command :ver and looking for +python in the list of
-" features.
+" This script needs only VIM compiled with the Python interpreter. It doesn't
+" rely on the exuberant ctags utilities. You can determine whether your VIM
+" has Python support by issuing command :ver and looking for +python in the
+" list of features.
 "
 " Installation
 " ------------
