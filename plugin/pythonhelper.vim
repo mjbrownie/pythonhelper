@@ -5,11 +5,11 @@
 "
 " Overview
 " --------
-" Vim script to help moving around in larger Python source files. It displays
-" current class, method or function the cursor is placed in on the status
-" line for every python file. It's more clever than Yegappan Lakshmanan's
-" taglist.vim because it takes into account indetation and comments to
-" determine what tag the cursor is placed in.
+" This Vim script helps you find yourself in larger Python source files. It
+" displays the current Python class, method or function the cursor is placed
+" on in the status line. It's smarter than Yegappan Lakshmanan's taglist.vim
+" because it takes indentation and comments into account in order to determine
+" what identifier the cursor is placed on.
 "
 " Requirements
 " ------------
