@@ -625,7 +625,7 @@ function! PHBufferDelete()
     " set the PHStatusLine for this window to an empty string
     let w:PHStatusLine = ""
 
-    " call Python function findTag() with the current buffer number and change status indicator
+    " call Python function deleteTags() with the current buffer number and change status indicator
     execute 'python deleteTags(' . expand("<abuf>") . ')'
 endfunction
 
