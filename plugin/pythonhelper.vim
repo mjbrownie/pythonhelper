@@ -374,7 +374,6 @@ class SimplePythonTagsParser(object):
     # }}}
 # }}}
 
-
 def vimBufferIterator(vimBuffer):
     for line in vimBuffer:
         yield line + "\n"
