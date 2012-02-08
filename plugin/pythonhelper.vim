@@ -158,13 +158,6 @@ class SimplePythonTagsParser(object):
         """
         # }}}
 
-        # CODE {{{
-        # make sure source has readline() method {{{
-        if ((hasattr(source, 'readline') == 0) or
-            (callable(source.readline) == 0)):
-            raise AttributeError("Source must have callable readline method.")
-        # }}}
-
         # remember what the source is
         self.source = source
         # }}}
