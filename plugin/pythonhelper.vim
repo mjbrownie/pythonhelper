@@ -23,7 +23,7 @@
 " 1. Make sure your Vim has python feature on (+python). If not, you will need
 "    to recompile it with --with-pythoninterp option to the configure script
 " 2. Copy script pythonhelper.vim to the $HOME/.vim/plugin directory
-" 3. add '%{TagInStatusLine()}' the statusline in your vimrc
+" 3. Add '%{TagInStatusLine()}' the statusline in your vimrc
 " 4. Run Vim and open any python file.
 "
 python << EOS
