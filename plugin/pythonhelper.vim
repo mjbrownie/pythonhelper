@@ -659,12 +659,11 @@ def deleteTags(bufferNumber):
     global TAGS, TAGLINENUMBERS, BUFFERTICKS
 
     # try to delete the tags for the buffer {{{
-    try:
-        del TAGS[bufferNumber]
-        del TAGLINENUMBERS[bufferNumber]
-        del BUFFERTICKS[bufferNumber]
-    except:
-        pass
+    for o in (TAGS, TAGLINENUMBERS, BUFFERTICKS):
+        try:
+            del o[bufferNumber]
+        except KeyError:
+            pass
     # }}}
     # }}}
 
