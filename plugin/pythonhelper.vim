@@ -717,8 +717,6 @@ autocmd BufDelete * silent call PHBufferDelete()
 " period of no activity after which the CursorHold event is triggered
 if (exists("g:pythonhelper_updatetime"))
     let &updatetime = g:pythonhelper_updatetime
-else
-    set updatetime=1000
 endif
 
 " }}}
