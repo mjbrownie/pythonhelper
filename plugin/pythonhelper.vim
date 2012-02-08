@@ -389,6 +389,9 @@ class SimplePythonTagsParser(object):
 # }}}
 
 
+def vimBufferIterator(vimBuffer):
+    return VimReadlineBuffer(vimBuffer)
+
 # class VimReadlineBuffer() {{{
 class VimReadlineBuffer(object):
     # DOC {{{
@@ -508,7 +511,7 @@ def getTags(bufferNumber, changedTick):
     # }}}
 
     # get the tags {{{
-    simpleTagsParser = SimplePythonTagsParser(VimReadlineBuffer(vim.current.buffer))
+    simpleTagsParser = SimplePythonTagsParser(vimBufferIterator(vim.current.buffer))
     tagLineNumbers, tags = simpleTagsParser.getTags()
     # }}}
 
