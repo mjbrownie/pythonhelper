@@ -23,7 +23,8 @@
 " 1. Make sure your Vim has the Python feature enabled (+python). If not, you
 "    will need to recompile it with the --with-pythoninterp option passed to
 "    the configure script
-" 2. Copy the pythonhelper.vim script to the $HOME/.vim/plugin directory
+" 2. Copy the pythonhelper.vim script to the $HOME/.vim/plugin directory, or
+"    install it in some other way (vim-addon-manager, pathogen, ...)
 " 3. Add '%{TagInStatusLine()}' the statusline in your vimrc
 " 4. Run Vim and open any Python file.
 "
