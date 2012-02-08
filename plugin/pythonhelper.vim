@@ -26,8 +26,8 @@
 " 2. Copy the pythonhelper.vim script to the $HOME/.vim/plugin directory, or
 "    install it in some other way (vim-addon-manager, pathogen, ...)
 " 3. Add '%{TagInStatusLine()}' to the statusline in your vimrc. You can also
-"    use %{TagInStatusLine()} or %{TagInStatusLine()} for just the tag name or
-"    type respectively.
+"    use %{TagInStatusLineTag()} or %{TagInStatusLineType()} for just the tag
+"    name or tag type respectively.
 " 4. Run Vim and open any Python file.
 "
 python << EOS
