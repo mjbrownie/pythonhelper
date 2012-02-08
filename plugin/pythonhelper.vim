@@ -154,7 +154,7 @@ class SimplePythonTagsParser(object):
         Parameters
 
             source -- source for which the tags will be generated. It must
-                provide callable method readline (i.e. as file objects do).
+                be a generator.
         """
         # }}}
 
@@ -182,14 +182,7 @@ class SimplePythonTagsParser(object):
         # }}}
 
         # go through all the lines in the source and localize all Python tags in it {{{
-        while 1:
-            # get next line
-            line = self.source.readline()
-
-            # finish when we reach the end of the source {{{
-            if (line == ''):
-                break
-            # }}}
+        for line in self.source:
 
             # increase line number
             lineNumber += 1
@@ -383,7 +376,12 @@ class SimplePythonTagsParser(object):
 
 
 def vimBufferIterator(vimBuffer):
-    return VimReadlineBuffer(vimBuffer)
+    buf = VimReadlineBuffer(vimBuffer)
+    while True:
+        line = buf.readline()
+        if line == '':
+            break
+        yield line
 
 # class VimReadlineBuffer() {{{
 class VimReadlineBuffer(object):
