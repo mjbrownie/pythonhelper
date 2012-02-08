@@ -628,6 +628,13 @@ def findTag(bufferNumber, changedTick):
 
     # handle possible exceptions {{{
     except Exception:
+        # FIXME: wrap try/except blocks around single sources of exceptions
+        # ONLY. Break this try/except block into as many small ones as you
+        # need, and only catch classes of exceptions that you have encountered.
+        # Catching "Exception" is very, very bad style!
+        # To the author: why is this clause here? There's no git log for why you
+        # have added it. Can you please put in a comment of a specific situation
+        # where you have encountered exceptions?
         # bury into the traceback {{{
         ec, ei, tb = sys.exc_info()
         while (tb != None):
