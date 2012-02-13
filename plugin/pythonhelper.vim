@@ -5,27 +5,31 @@
 "
 " Overview
 " --------
-" Vim script to help moving around in larger Python source files. It displays
-" current class, method or function the cursor is placed in on the status
-" line for every python file. It's more clever than Yegappan Lakshmanan's
-" taglist.vim because it takes into account indetation and comments to
-" determine what tag the cursor is placed in.
+" This Vim script helps you find yourself in larger Python source files. It
+" displays the current Python class, method or function the cursor is placed
+" on in the status line. It's smarter than Yegappan Lakshmanan's taglist.vim
+" because it takes indentation and comments into account in order to determine
+" what identifier the cursor is placed on.
 "
 " Requirements
 " ------------
-" This script needs only VIM compiled with Python interpreter. It doesn't rely
-" on exuberant ctags utility. You can determine whether your VIM has Python
-" support by issuing command :ver and looking for +python in the list of
-" features.
+" This script needs only VIM compiled with the Python interpreter. It doesn't
+" rely on the exuberant ctags utilities. You can determine whether your VIM
+" has Python support by issuing command :ver and looking for +python in the
+" list of features.
 "
 " Installation
 " ------------
-" 1. Make sure your Vim has python feature on (+python). If not, you will need
-"    to recompile it with --with-pythoninterp option to the configure script
-" 2. Copy script pythonhelper.vim to the $HOME/.vim/plugin directory
-" 3. add '%{TagInStatusLine()}' yo your vimrc/statusline
-" 3. Run Vim and open any python file.
-" 
+" 1. Make sure your Vim has the Python feature enabled (+python). If not, you
+"    will need to recompile it with the --with-pythoninterp option passed to
+"    the configure script
+" 2. Copy the pythonhelper.vim script to the $HOME/.vim/plugin directory, or
+"    install it in some other way (vim-addon-manager, pathogen, ...)
+" 3. Add '%{TagInStatusLine()}' to the statusline in your vimrc. You can also
+"    use %{TagInStatusLineTag()} or %{TagInStatusLineType()} for just the tag
+"    name or tag type respectively.
+" 4. Run Vim and open any Python file.
+"
 python << EOS
 
 # import of required modules {{{
@@ -53,7 +57,7 @@ class PythonTag(object):
 
 
     # STATIC VARIABLES {{{
-    
+
     # possible tag types {{{
     TT_CLASS                    = 0
     TT_METHOD                   = 1
@@ -72,13 +76,13 @@ class PythonTag(object):
 
 
     # METHODS {{{
-    
+
     def __init__(self, type, name, fullName, lineNumber, indentLevel):
         # DOC {{{
         """Initializes instances of PythonTag().
 
         Parameters
-            
+
             type -- tag type
 
             name -- short tag name
@@ -119,12 +123,12 @@ class PythonTag(object):
 
     # }}}
 # }}}
-        
 
-# class SimplePythonTagsParser() {{{ 
+
+# class SimplePythonTagsParser() {{{
 class SimplePythonTagsParser(object):
     # DOC {{{
-    """Provides a simple python tag parser.
+    """Provides a simple Python tag parser.
     """
     # }}}
 
@@ -144,7 +148,7 @@ class SimplePythonTagsParser(object):
 
 
     # METHODS {{{
-    
+
     def __init__(self, source):
         # DOC {{{
         """Initializes instances of SimplePythonTagsParser().
@@ -152,54 +156,37 @@ class SimplePythonTagsParser(object):
         Parameters
 
             source -- source for which the tags will be generated. It must
-                provide callable method readline (i.e. as file objects do).
+                be a generator.
         """
         # }}}
 
-        # CODE {{{
-        # make sure source has readline() method {{{
-        if ((hasattr(source, 'readline') == 0) or
-            (callable(source.readline) == 0)):
-            raise AttributeError("Source must have callable readline method.")
-        # }}}
-                
         # remember what the source is
         self.source = source
         # }}}
 
-    
+
     def getTags(self):
         # DOC {{{
-        """Determines all the tags for the buffer. Returns a tuple in format
+        """Determines all the tags for the buffer. Returns a tuple in the format
         (tagLineNumbers, tags,).
         """
         # }}}
 
         # CODE {{{
-        # initialize the resulting list of the tag line numbers and the tag information {{{
+        # initialize the resulting list of tag line numbers and the tag information {{{
         tagLineNumbers  = []
         tags            = {}
         # }}}
 
         # initalize local auxiliary variables {{{
         tagsStack       = []
-        lineNumber      = 0
         # }}}
-        
-        # go through all the lines in the source and localize all python tags in it {{{
-        while 1:
-            # get next line
-            line = self.source.readline()
 
-            # finish if this is the end of the source {{{
-            if (line == ''):
-                break
-            # }}}
+        import itertools
+        # go through all the lines in the source and localize all Python tags in it {{{
+        for (line, lineNumber) in zip(self.source, itertools.count(1)):
 
-            # increase the line number
-            lineNumber += 1
-
-            # extract the line indentation characters and its content {{{
+            # extract the line's indentation characters and its content {{{
             lineMatch           = self.COMMENTS_INDENT_RE.match(line)
             lineContent         = lineMatch.group(2)
             # }}}
@@ -231,14 +218,14 @@ class SimplePythonTagsParser(object):
             # }}}
         # }}}
 
-        # return the tags data for the source
+        # return tag data for the source
         return (tagLineNumbers, tags,)
         # }}}
 
 
     def getParentTag(self, tagsStack):
         # DOC {{{
-        """Returns the parent/enclosing tag (instance of PythonTag()) from the
+        """Given a tag, returns its parent tag (instance of PythonTag()) from the
         specified tag list. If no such parent tag exists, returns None.
 
         Parameters
@@ -254,7 +241,7 @@ class SimplePythonTagsParser(object):
         else:
             parentTag = None
         # }}}
-         
+
         # return the tag
         return parentTag
         # }}}
@@ -304,18 +291,18 @@ class SimplePythonTagsParser(object):
 
             tagName -- short name of the current tag
 
-            tagTypeDecidingMethod -- reference to method that is called to
+            tagTypeDecidingMethod -- reference to the method that is called to
                 determine the type of the current tag
         """
         # }}}
 
         # CODE {{{
-        # compute the indentation level
+        # compute indentation level
         indentLevel = self.computeIndentationLevel(indentChars)
-        # get the parent tag
+        # get parent tag
         parentTag = self.getParentTag(tagsStack)
 
-        # handle an enclosed tag {{{
+        # handle enclosed tag {{{
         while (parentTag):
             # if the indent level of the parent tag is greater than of the current tag, use parent tag of the parent tag {{{
             if (parentTag.indentLevel >= indentLevel):
@@ -330,7 +317,7 @@ class SimplePythonTagsParser(object):
                 break
             # }}}
 
-            # use parent tag of the parent tag
+            # use the parent tag of the parent tag
             parentTag = self.getParentTag(tagsStack)
         # }}}
         # handle a top-indent level tag {{{
@@ -370,7 +357,7 @@ class SimplePythonTagsParser(object):
         tag) for functions/methods.
 
         Parameters
-        
+
             parentTagType -- type of the enclosing/parent tag
         """
         # }}}
@@ -386,74 +373,20 @@ class SimplePythonTagsParser(object):
     # }}}
 # }}}
 
-
-# class VimReadlineBuffer() {{{
-class VimReadlineBuffer(object):
-    # DOC {{{
-    """A simple wrapper class around vim's buffer that provides readline
-    method.
-    """
-    # }}}
-
-
-    # METHODS {{{
-
-    def __init__(self, vimBuffer):
-        # DOC {{{
-        """Initializes instances of VimReadlineBuffer().
-
-        Parameters
-
-            vimBuffer -- VIM's buffer
-        """
-        # }}}
-
-        # CODE {{{
-        # remember the settings
-        self.vimBuffer          = vimBuffer
-
-        # initialize instance attributes {{{
-        self.currentLine        = -1
-        self.bufferLines        = len(vimBuffer)
-        # }}}
-        # }}}
-
-
-    def readline(self):
-        # DOC {{{
-        """Returns next line from the buffer. If all the buffer has been read,
-        returns empty string.
-        """
-        # }}}
-
-        # CODE {{{
-        # increase the current line counter
-        self.currentLine += 1
-
-        # notify end of file if we reached beyond the last line {{{
-        if (self.currentLine == self.bufferLines):
-            return ''
-        # }}}
-
-        # return the line with an added newline (vim stores the lines without it)
-        return "%s\n" % (self.vimBuffer[self.currentLine],)
-        # }}}
-
-    
-    # }}}
-# }}}
-
+def vimBufferIterator(vimBuffer):
+    for line in vimBuffer:
+        yield line + "\n"
 
 def getNearestLineIndex(row, tagLineNumbers):
     # DOC {{{
-    """Returns the index of line in 'tagLineNumbers' list that is nearest to the
-    specified cursor row.
+    """Returns the index of 'tagLineNumbers' that contains the line nearest to
+    the specified cursor row.
 
     Parameters
 
-	row -- current cursor row
+        row -- current cursor row
 
-	tagLineNumbers -- list of tags' line numbers (ie. their position)
+        tagLineNumbers -- list of tags' line numbers (ie. their position)
     """
     # }}}
 
@@ -465,34 +398,34 @@ def getNearestLineIndex(row, tagLineNumbers):
 
     # go through all tag line numbers and find the one nearest to the specified row {{{
     for lineIndex, lineNumber in enumerate(tagLineNumbers):
-	# if the current line is nearer the current cursor position, take it {{{
-	if (nearestLineNumber < lineNumber <= row):
-	    nearestLineNumber   = lineNumber
+        # if the current line is nearer the current cursor position, take it {{{
+        if (nearestLineNumber < lineNumber <= row):
+            nearestLineNumber   = lineNumber
             nearestLineIndex    = lineIndex
-	# }}}
+        # }}}
 
-	# if we've got past the current cursor position, let's end the search {{{
-	if (lineNumber >= row):
-	    break
-	# }}}
+        # if we've come past the current cursor position, end the search {{{
+        if (lineNumber >= row):
+            break
+        # }}}
     # }}}
 
-    # return index of the line with the nearest tag
+    # return the index of the line with the nearest tag
     return nearestLineIndex
     # }}}
 
 
 def getTags(bufferNumber, changedTick):
     # DOC {{{
-    """Reads the tags for the specified buffer number. Returns a tuple
-    (taglinenumber[buffer], tags[buffer],).
+    """Reads the tags for the buffer specified by the number. Returns a tuple
+    of the format (taglinenumber[buffer], tags[buffer],).
 
     Parameters
 
-	bufferNumber -- number of the current buffer
+        bufferNumber -- number of the current buffer
 
-	changedTick -- ever increasing number used to tell if the buffer has
-	    been modified since the last time
+        changedTick -- always-increasing number used to indicate that the buffer
+            has been modified since the last time
     """
     # }}}
 
@@ -502,11 +435,11 @@ def getTags(bufferNumber, changedTick):
 
     # return immediately if there's no need to update the tags {{{
     if (BUFFERTICKS.get(bufferNumber, None) == changedTick):
-	return (TAGLINENUMBERS[bufferNumber], TAGS[bufferNumber],)
+        return (TAGLINENUMBERS[bufferNumber], TAGS[bufferNumber],)
     # }}}
 
     # get the tags {{{
-    simpleTagsParser = SimplePythonTagsParser(VimReadlineBuffer(vim.current.buffer))
+    simpleTagsParser = SimplePythonTagsParser(vimBufferIterator(vim.current.buffer))
     tagLineNumbers, tags = simpleTagsParser.getTags()
     # }}}
 
@@ -527,37 +460,38 @@ def findTag(bufferNumber, changedTick):
 
     Parameters
 
-	bufferNumber -- number of the current buffer
+        bufferNumber -- number of the current buffer
 
-	changedTick -- ever increasing number used to tell if the buffer has
-	    been modified since the last time
+        changedTick -- always-increasing number used to indicate that the buffer
+            has been modified since the last time
     """
     # }}}
 
     # CODE {{{
     # try to find the best tag {{{
     try:
-	# get the tags data for the current buffer
-	tagLineNumbers, tags = getTags(bufferNumber, changedTick)
+        # get the tag data for the current buffer
+        tagLineNumbers, tags = getTags(bufferNumber, changedTick)
 
-	# link to vim's internal data {{{
-	currentBuffer = vim.current.buffer
-	currentWindow = vim.current.window
-	row, col = currentWindow.cursor
-	# }}}
+        # link to Vim's internal data {{{
+        currentBuffer = vim.current.buffer
+        currentWindow = vim.current.window
+        row, col = currentWindow.cursor
+        # }}}
 
-	# get the index of the nearest line
-	nearestLineIndex = getNearestLineIndex(row, tagLineNumbers)
+        # get the index of the nearest line
+        nearestLineIndex = getNearestLineIndex(row, tagLineNumbers)
 
-	# if any line was found, try to find if the tag is appropriate {{{
-	# (ie. the cursor can be below the last tag but on a code that has nothing
-	# to do with the tag, because it's indented differently, in such case no
-	# appropriate tag has been found.)
+        # if a line has been found, find out if the tag is correct {{{
+        # E.g. the cursor might be below the last tag, but in code that has
+        # nothing to do with the tag, which we know because the line is
+        # indented differently. In such a case no applicable tag has been
+        # found.
         while (nearestLineIndex > -1):
             # get the line number of the nearest tag
             nearestLineNumber = tagLineNumbers[nearestLineIndex]
 
-            # walk through all the lines in range (nearestTagLine, cursorRow) {{{
+            # walk through all the lines in the range (nearestTagLine, cursorRow) {{{
             for lineNumber in xrange(nearestLineNumber + 1, row):
                 # get the current line
                 line = currentBuffer[lineNumber]
@@ -586,56 +520,69 @@ def findTag(bufferNumber, changedTick):
                     if (i == len(line)):
                         continue
                     # }}}
-                    # if the next character is a '#' (python comment), skip the line {{{
+                    # if the next character is a '#' (python comment), skip to the next line {{{
                     if (line[i] == '#'):
                         continue
                     # }}}
 
-                    # if the line's indentation starts before or at the nearest tag's one, the tag is invalid {{{
+                    # if the line's indentation starts before or at the nearest tag's, the tag is invalid {{{
                     if (lineStart <= tags[nearestLineNumber].indentLevel):
                         nearestLineIndex -= 1
                         break
                     # }}}
                 # }}}
             # }}}
-            # the tag is appropriate, so use it {{{
+            # the tag is correct, so use it {{{
             else:
                 break
-	    # }}}
+            # }}}
         # }}}
-        # no appropriate tag has been found {{{
-	else:
-	    nearestLineNumber = -1
-	# }}}
-	 
-	# describe the cursor position (what tag the cursor is on) {{{
+        # no applicable tag has been found {{{
+        else:
+            nearestLineNumber = -1
+        # }}}
+
+        # describe the cursor position (what tag the cursor is on) {{{
         # reset the description
-	tagDescription = ""
+        tagDescription = ""
+        tagDescriptionTag = ""
+        tagDescriptionType = ""
 
-        # if an appropriate tag has been found, set the description accordingly {{{
-	if (nearestLineNumber > -1):
-	    tagInfo = tags[nearestLineNumber]
-	    tagDescription = "%s (%s)" % (tagInfo.fullName, PythonTag.TAG_TYPE_NAME[tagInfo.type],)
-	# }}}
-	# }}}
+        # if an applicable tag has been found, set the description accordingly {{{
+        if (nearestLineNumber > -1):
+            tagInfo = tags[nearestLineNumber]
+            tagDescriptionTag = tagInfo.fullName
+            tagDescriptionType = PythonTag.TAG_TYPE_NAME[tagInfo.type]
+            tagDescription = "%s (%s)" % (tagDescriptionTag, tagDescriptionType)
+        # }}}
+        # }}}
 
-	# update the variable for the status line so it get updated with the new description
-	vim.command("let w:PHStatusLine=\"%s\"" % (tagDescription,))
+        # update the variable for the status line so it get updated with the new description
+        vim.command("let w:PHStatusLine=\"%s\"" % (tagDescription,))
+        vim.command("let w:PHStatusLineTag=\"%s\"" % (tagDescriptionTag,))
+        vim.command("let w:PHStatusLineType=\"%s\"" % (tagDescriptionType,))
     # }}}
 
     # handle possible exceptions {{{
     except Exception:
+        # FIXME: wrap try/except blocks around single sources of exceptions
+        # ONLY. Break this try/except block into as many small ones as you
+        # need, and only catch classes of exceptions that you have encountered.
+        # Catching "Exception" is very, very bad style!
+        # To the author: why is this clause here? There's no git log for why you
+        # have added it. Can you please put in a comment of a specific situation
+        # where you have encountered exceptions?
         # bury into the traceback {{{
-	ec, ei, tb = sys.exc_info()
-	while (tb != None):
-	    if (tb.tb_next == None):
-		break
-	    tb = tb.tb_next
+        ec, ei, tb = sys.exc_info()
+        while (tb != None):
+            if (tb.tb_next == None):
+                break
+            tb = tb.tb_next
         # }}}
 
         # spit out the error {{{
-	print "ERROR: %s %s %s:%u" % (ec.__name__, ei, tb.tb_frame.f_code.co_filename, tb.tb_lineno,)
-	time.sleep(0.5)
+        print "ERROR: %s %s %s:%u" % (ec.__name__, ei, tb.tb_frame.f_code.co_filename, tb.tb_lineno,)
+        time.sleep(0.5)
         # }}}
     # }}}
     # }}}
@@ -643,7 +590,7 @@ def findTag(bufferNumber, changedTick):
 
 def deleteTags(bufferNumber):
     # DOC {{{
-    """Removes tags data for the specified buffer number.
+    """Removes tag data for the specified buffer number.
 
     Parameters
 
@@ -654,14 +601,13 @@ def deleteTags(bufferNumber):
     # CODE {{{
     # define global variables
     global TAGS, TAGLINENUMBERS, BUFFERTICKS
-    
+
     # try to delete the tags for the buffer {{{
-    try:
-        del TAGS[bufferNumber]
-        del TAGLINENUMBERS[bufferNumber]
-        del BUFFERTICKS[bufferNumber]
-    except:
-        pass
+    for o in (TAGS, TAGLINENUMBERS, BUFFERTICKS):
+        try:
+            del o[bufferNumber]
+        except KeyError:
+            pass
     # }}}
     # }}}
 
@@ -671,23 +617,27 @@ EOS
 " VIM functions {{{
 
 function! PHCursorHold()
-    " only python is supported {{{
+    " only Python is supported {{{
     if (!exists('b:current_syntax') || (b:current_syntax != 'python'))
-	let w:PHStatusLine = ''
-	return
+        let w:PHStatusLine = ''
+        let w:PHStatusLineTag = ''
+        let w:PHStatusLineType = ''
+        return
     endif
     " }}}
-    
-    " call python function findTag() with the current buffer number and changed ticks
+
+    " call Python function findTag() with the current buffer number and change status indicator
     execute 'python findTag(' . expand("<abuf>") . ', ' . b:changedtick . ')'
 endfunction
 
 
 function! PHBufferDelete()
-    " set PHStatusLine for this window to empty string
+    " set the PHStatusLine etc for this window to an empty string
     let w:PHStatusLine = ""
-    
-    " call python function deleteTags() with the cur
+    let w:PHStatusLineTag = ''
+    let w:PHStatusLineType = ''
+
+    " call Python function deleteTags() with the current buffer number and change status indicator
     execute 'python deleteTags(' . expand("<abuf>") . ')'
 endfunction
 
@@ -696,7 +646,29 @@ function! TagInStatusLine()
     " return value of w:PHStatusLine in case it's set
     if (exists("w:PHStatusLine"))
         return w:PHStatusLine
-    " otherwise just return empty string
+    " otherwise just return an empty string
+    else
+        return ""
+    endif
+endfunction
+
+
+function! TagInStatusLineTag()
+    " return value of w:PHStatusLineTag in case it's set
+    if (exists("w:PHStatusLineTag"))
+        return w:PHStatusLineTag
+    " otherwise just return an empty string
+    else
+        return ""
+    endif
+endfunction
+
+
+function! TagInStatusLineType()
+    " return value of w:PHStatusLineType in case it's set
+    if (exists("w:PHStatusLineType"))
+        return w:PHStatusLineType
+    " otherwise just return an empty string
     else
         return ""
     endif
@@ -735,16 +707,17 @@ endfunction
 " }}}
 
 
-" event binding, vim customizing {{{
+" event binding, Vim customization {{{
 
-" autocommands binding
+" autocommands
 autocmd CursorHold * call PHCursorHold()
 autocmd CursorHoldI * call PHCursorHold()
 autocmd BufDelete * silent call PHBufferDelete()
 
-" time that determines after how long time of no activity the CursorHold event
-" is fired up
-set updatetime=1000
+" period of no activity after which the CursorHold event is triggered
+if (exists("g:pythonhelper_updatetime"))
+    let &updatetime = g:pythonhelper_updatetime
+endif
 
 " }}}
 
