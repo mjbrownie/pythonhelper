@@ -30,6 +30,18 @@
 "    name or tag type respectively.
 " 4. Run Vim and open any Python file.
 "
+if !has('python')
+    function! TagInStatusLineTag()
+        return ''
+    endfunction
+    function! TagInStatusLine()
+        return ''
+    endfunction
+    function! TagInStatusLineType()
+        return ''
+    endfunction
+    finish
+endif
 python << EOS
 
 # import of required modules {{{
